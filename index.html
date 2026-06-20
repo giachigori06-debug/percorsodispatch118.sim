@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>PERCORSO DISPATCH OPERATORE 118</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    color:white;
+}
+
+header{
+    background: linear-gradient(90deg, #111827, #0f172a);
+    padding:16px 18px;
+    font-weight:bold;
+    border-bottom:1px solid #334155;
+    letter-spacing:0.5px;
+}
+
+.container{
+    max-width:950px;
+    margin:0 auto;
+    padding:20px;
+}
+
+.card{
+    background: rgba(30,41,59,0.92);
+    border:1px solid #334155;
+    border-radius:16px;
+    padding:18px;
+    box-shadow:0 18px 45px rgba(0,0,0,0.55);
+    margin-top:20px;
+    backdrop-filter: blur(6px);
+    transition: transform 0.2s ease;
+}
+
+.card:hover{
+    transform: translateY(-2px);
+}
+
+select, button{
+    padding:10px;
+    border-radius:10px;
+    border:none;
+    margin:6px 4px;
+    font-weight:bold;
+}
+
+button{
+    cursor:pointer;
+    transition: all 0.2s ease;
+}
+
+button:hover{
+    transform: scale(1.03);
+    filter: brightness(1.1);
+}
+
+.yes{background:#22c55e;color:white;}
+.no{background:#ef4444;color:white;}
+.primary{background:#3b82f6;color:white;}
+
+.question{
+    font-size:20px;
+    margin-top:10px;
+    margin-bottom:10px;
+    line-height:1.4;
+}
+
+.code{
+    font-size:22px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.dispatch{
+    margin-top:10px;
+    padding:10px;
+    background:#0f172a;
+    border:1px solid #334155;
+    border-radius:10px;
+    font-size:14px;
+    line-height:1.6;
+}
+
+.small{
+    font-size:12px;
+    opacity:0.7;
+}
+
+.log{
+    margin-top:10px;
+    padding:10px;
+    background:#0f172a;
+    border:1px solid #334155;
+    border-radius:10px;
+    font-size:12px;
+    max-height:140px;
+    overflow:auto;
+}
+
+.reason{
+    margin-top:10px;
+    padding:10px;
+    background:#111827;
+    border:1px solid #334155;
+    border-radius:10px;
+}
+
+.dispatch{
+    margin-top:10px;
+    padding:10px;
+    background:#0f172a;
+    border:1px solid #334155;
+    border-radius:10px;
+    font-size:14px;
+    line-height:1.6;
+}
+
+.small{
+    font-size:12px;
+    opacity:0.7;
+}
+
+.log{
+    margin-top:10px;
+    padding:10px;
+    background:#0f172a;
+    border:1px solid #334155;
+    border-radius:10px;
+    font-size:12px;
+    max-height:140px;
+    overflow:auto;
+}
+
+.reason{
+    margin-top:10px;
+    padding:10px;
+    background:#111827;
+    border:1px solid #334155;
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>PERCORSO DISPATCH OPERATORE 118</header>
+
+<div class="container">
+
+<div class="card">
+
+<h3>Selezione codice patologia</h3>
+
+<select id="pathSelect">
+<option value="C01">C01 Traumatica</option>
+<option value="C02">C02 Cardiocircolatoria</option>
+<option value="C03">C03 Respiratoria</option>
+<option value="C04">C04 Neurologica</option>
+<option value="C05">C05 Psichiatrica</option>
+<option value="C06">C06 Neoplastica</option>
+<option value="C07">C07 Intossicazione</option>
+<option value="C08">C08 Metabolica</option>
+<option value="C09">C09 Gastroenterologica</option>
+<option value="C10">C10 Urologica</option>
+<option value="C11">C11 Oculistica</option>
+<option value="C12">C12 Otorinolaringoiatrica</option>
+<option value="C13">C13 Dermatologica</option>
+<option value="C14">C14 Ostetrico-Ginecologica</option>
+<option value="C15">C15 Infettiva</option>
+<option value="C19">C19 Altra patologia</option>
+<option value="C20">C20 Non identificata</option>
+</select>
+
+<button class="primary" onclick="start()">Avvia assistente</button>
+
+<div id="assistant" style="display:none;">
+
+<div class="small" id="progress"></div>
+
+<div class="question" id="question"></div>
+
+<button class="yes" onclick="answer(true)">SI</button>
+<button class="no" onclick="answer(false)">NO</button>
+
+<div class="code" id="code"></div>
+
+<div class="dispatch" id="dispatch"></div>
+
+<div class="reason" id="reason"></div>
+
+<div class="log" id="log"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const codes={
+C01:"C01",C02:"C02",C03:"C03",C04:"C04",C05:"C05",
+C06:"C06",C07:"C07",C08:"C08",C09:"C09",C10:"C10",
+C11:"C11",C12:"C12",C13:"C13",C14:"C14",C15:"C15",
+C19:"C19",C20:"C20"
+};
+
+const protocols={
+C01:{name:"Trauma",questions:[
+{q:"Perdita di coscienza?",severity:"ROSSO"},
+{q:"Criteri di trauma maggiore?",severity:"ROSSO"},
+{q:"Emorragia attiva importante?",severity:"ROSSO"},
+{q:"Incidente stradale?",severity:"GIALLO"},
+{q:"Trauma cranico/toracico?",severity:"GIALLO"},
+{q:"Sospetta frattura bacino/femore?",severity:"GIALLO"},
+{q:"Sospetta frattura arti?",severity:"VERDE"},
+{q:"Traumi minori?",severity:"VERDE"},
+{q:"Lesione lieve?",severity:"VERDE"}
+]},
+C02:{name:"Cardiocircolatoria",questions:[
+{q:"Dolore toracico oppressivo?",severity:"ROSSO"},
+{q:"Dispnea importante?",severity:"ROSSO"},
+{q:"Sudorazione fredda?",severity:"GIALLO"},
+{q:"Nausea?",severity:"VERDE"},
+{q:"Sintomi lievi?",severity:"VERDE"}
+]},
+C03:{name:"Respiratoria",questions:[
+{q:"Incapacità di parlare?",severity:"ROSSO"},
+{q:"Cianosi?",severity:"ROSSO"},
+{q:"Dispnea moderata?",severity:"GIALLO"},
+{q:"Tosse persistente?",severity:"VERDE"},
+{q:"Sintomi lievi?",severity:"VERDE"}
+]},
+C04:{name:"Neurologica",questions:[
+{q:"Deficit neurologico improvviso?",severity:"ROSSO"},
+{q:"Alterazione coscienza?",severity:"ROSSO"},
+{q:"Cefalea acuta?",severity:"GIALLO"},
+{q:"Vertigini?",severity:"VERDE"},
+{q:"Sintomi lievi?",severity:"VERDE"}
+]},
+C05:{name:"Psichiatrica",questions:[
+{q:"Rischio autolesivo?",severity:"ROSSO"},
+{q:"Aggressività grave?",severity:"ROSSO"},
+{q:"Agitazione?",severity:"GIALLO"},
+{q:"Ansia?",severity:"VERDE"},
+{q:"Stato stabile?",severity:"VERDE"}
+]},
+C06:{name:"Neoplastica",questions:[
+{q:"Complicanza acuta?",severity:"ROSSO"},
+{q:"Instabilità clinica?",severity:"ROSSO"},
+{q:"Peggioramento recente?",severity:"GIALLO"},
+{q:"Dolore controllato?",severity:"VERDE"},
+{q:"Condizione stabile?",severity:"VERDE"}
+]},
+C07:{name:"Intossicazione",questions:[
+{q:"Esposizione tossica grave?",severity:"ROSSO"},
+{q:"Ingestione di corpi estranei o sostanze?",severity:"ROSSO"},
+{q:"Confusione?",severity:"ROSSO"},
+{q:"Vomito?",severity:"GIALLO"},
+{q:"Sintomi lievi?",severity:"VERDE"},
+{q:"Stabile?",severity:"VERDE"}
+]},
+C08:{name:"Metabolica",questions:[
+{q:"Perdita di coscienza?",severity:"ROSSO"},
+{q:"Confusione?",severity:"ROSSO"},
+{q:"Debolezza?",severity:"GIALLO"},
+{q:"Stabile?",severity:"VERDE"},
+{q:"Nessun sintomo?",severity:"BIANCO"}
+]},
+C09:{name:"Gastroenterologica",questions:[
+{q:"Sanguinamento gastrointestinale?",severity:"ROSSO"},
+{q:"Ingestione di corpi estranei o sostanze?",severity:"ROSSO"},
+{q:"Dolore addominale importante?",severity:"GIALLO"},
+{q:"Nausea?",severity:"VERDE"},
+{q:"Sintomi lievi?",severity:"VERDE"}
+]},
+C10:{name:"Urologica",questions:[
+{q:"Ematuria importante?",severity:"GIALLO"},
+{q:"Ritenzione acuta?",severity:"GIALLO"},
+{q:"Dolore moderato?",severity:"GIALLO"},
+{q:"Sintomi lievi?",severity:"VERDE"},
+{q:"Stabile?",severity:"BIANCO"}
+]},
+C11:{name:"Oculistica",questions:[
+{q:"Perdita visiva improvvisa?",severity:"ROSSO"},
+{q:"Trauma oculare?",severity:"ROSSO"},
+{q:"Dolore oculare?",severity:"GIALLO"},
+{q:"Fastidio lieve?",severity:"VERDE"},
+{q:"Stabile?",severity:"VERDE"}
+]},
+C12:{name:"Otorinolaringoiatrica",questions:[
+{q:"Ostruzione vie aeree?",severity:"ROSSO"},
+{q:"Epistassi importante?",severity:"GIALLO"},
+{q:"Dolore otorinolaringoiatrico?",severity:"GIALLO"},
+{q:"Sintomi lievi?",severity:"VERDE"},
+{q:"Stabile?",severity:"BIANCO"}
+]},
+C13:{name:"Dermatologica",questions:[
+{q:"Ustione di grado III estesa?",severity:"ROSSO"},
+{q:"Infezione grave?",severity:"ROSSO"},
+{q:"Lesione moderata?",severity:"GIALLO"},
+{q:"Irritazione?",severity:"VERDE"},
+{q:"Stabile?",severity:"VERDE"}
+]},
+C14:{name:"Ostetrico-Ginecologica",questions:[
+{q:"Emorragia vaginale?",severity:"ROSSO"},
+{q:"Travaglio in corso?",severity:"ROSSO"},
+{q:"Complicanza gravidanza?",severity:"ROSSO"},
+{q:"Dolore pelvico?",severity:"GIALLO"},
+{q:"Contrazioni lievi?",severity:"VERDE"},
+{q:"Stabile?",severity:"VERDE"}
+]},
+C15:{name:"Infettiva",questions:[
+{q:"Segni di sepsi?",severity:"ROSSO"},
+{q:"Febbre > 39,5 C?",severity:"GIALLO"},
+{q:"Febbre < 39,5 C?",severity:"VERDE"},
+{q:"Sintomi lievi?",severity:"VERDE"},
+{q:"Stabile?",severity:"VERDE"}
+]},
+C19:{name:"Altra patologia",questions:[
+{q:"Instabilità clinica?",severity:"ROSSO"},
+{q:"Sintomi multipli, ma clinicamente stabile?",severity:"GIALLO"},
+{q:"Lievi sintomi?",severity:"VERDE"},
+{q:"Niente di acuto rilevabile?",severity:"BIANCO"}
+]},
+C20:{name:"Non identificata",questions:[
+{q:"Possibile MAXIEMERGENZA?",severity:"ROSSO"},
+{q:"Apertura porte?",severity:"ROSSO"},
+{q:"Situazione sconosiuta?",severity:"ROSSO"}
+]}
+};
+
+let state={
+path:null,
+index:0,
+red:false,
+events:[],
+log:[]
+};
+
+function start(){
+state.path=document.getElementById("pathSelect").value;
+state.index=0;
+state.red=false;
+state.events=[];
+state.log=[];
+document.getElementById("assistant").style.display="block";
+next();
+}
+
+function next(){
+const p=protocols[state.path];
+if(state.index>=p.questions.length) return finish();
+
+const q=p.questions[state.index];
+state.current=q;
+
+document.getElementById("question").innerText=q.q;
+document.getElementById("progress").innerText=
+"Domanda "+(state.index+1)+" / "+p.questions.length;
+
+update();
+}
+
+function answer(v){
+const q=state.current;
+
+state.events.push({q:q.q, v, severity:q.severity});
+
+if(v){
+state.log.push("SI: "+q.q);
+if(q.severity==="ROSSO") state.red=true;
+}else{
+state.log.push("NO: "+q.q);
+}
+
+state.index++;
+
+if(q.severity==="ROSSO" && v) return finish(true);
+
+next();
+}
+
+function computeColor(){
+if(state.red) return "ROSSO";
+
+let hasYellow=false;
+let hasGreen=false;
+
+for(const e of state.events){
+if(e.v){
+if(e.severity==="ROSSO") return "ROSSO";
+if(e.severity==="GIALLO") hasYellow=true;
+if(e.severity==="VERDE") hasGreen=true;
+}
+}
+
+if(hasYellow) return "GIALLO";
+if(hasGreen) return "VERDE";
+
+return "BIANCO";
+}
+
+function getDispatch(color){
+if(color==="ROSSO"){
+return {
+mezzo:"MSA + MSB",
+sirena:"SI",
+priorita:"1 (massima)"
+};
+}
+if(color==="GIALLO"){
+return {
+mezzo:"MSA/MSB",
+sirena:"SI",
+priorita:"2"
+};
+}
+if(color==="VERDE"){
+return {
+mezzo:"MSB",
+sirena:"NO",
+priorita:"3"
+};
+}
+return {
+mezzo:"Nessun invio urgente",
+sirena:"NO",
+priorita:"4"
+};
+}
+
+function generateReason(color){
+const p=protocols[state.path];
+
+let base="Sistema: "+p.name+". ";
+
+if(color==="ROSSO") base+="Emergenza con attivazione immediata.";
+else if(color==="GIALLO") base+="Urgenza clinica con possibile evoluzione.";
+else if(color==="VERDE") base+="Condizione stabile.";
+else base+="Nessuna criticità rilevata.";
+
+return base;
+}
+
+function update(){
+const color=computeColor();
+const d=getDispatch(color);
+
+document.getElementById("code").innerText=
+codes[state.path]+" - "+color;
+
+document.getElementById("dispatch").innerText=
+"MEZZO: "+d.mezzo+"\nSIRENA: "+d.sirena+"\nPRIORITÀ: "+d.priorita;
+
+document.getElementById("reason").innerText=
+generateReason(color);
+
+document.getElementById("log").innerText=
+state.log.slice(-7).join("\n");
+}
+
+function finish(){
+const color=computeColor();
+const d=getDispatch(color);
+
+document.getElementById("question").innerText="VALUTAZIONE COMPLETATA";
+
+document.getElementById("code").innerText=
+codes[state.path]+" - "+color;
+
+document.getElementById("dispatch").innerText=
+"MEZZO: "+d.mezzo+"\nSIRENA: "+d.sirena+"\nPRIORITÀ: "+d.priorita;
+
+document.getElementById("reason").innerText=
+generateReason(color);
+
+document.getElementById("log").innerText=
+state.log.join("\n");
+}
+
+</script>
+
+</body>
+</html>
